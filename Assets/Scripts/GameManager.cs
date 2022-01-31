@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 /**1. menu 
@@ -23,7 +24,10 @@ public class GameManager : MonoBehaviour
     //DaysOfTheWeek currentDay = DaysOfTheWeek.Sunday;
     public GameState currentGameState = GameState.Menu;
     private static GameManager sharedInstance;
-
+    public Canvas mainmenu;
+    public Canvas gamemenu;
+    public Canvas gameovermenu;
+    int collectedCoins = 0;
     private void Awake()
     {
         sharedInstance = this;
@@ -32,16 +36,20 @@ public class GameManager : MonoBehaviour
     {
         return sharedInstance;
     }
-    void StartGame()
+   public void StartGame()
     {
         LevelGenerator.sharedInstance.createInitialBlocks();
         PlayerControler.GetInstance().StartGame();
         ChangeGameState(GameState.Ingame);
+        ViewInGame.GetInstance().ShowHighestScore();
     }
-    private void Start()
+    public void Start()
     {
         //StartGame();
         currentGameState = GameState.Menu;
+        mainmenu.enabled = true;
+        gamemenu.enabled = false;
+        gameovermenu.enabled = false;
 
     }
     private void Update()
@@ -59,6 +67,7 @@ public class GameManager : MonoBehaviour
         LevelGenerator.sharedInstance.RemoveAllBlocks();
        
         ChangeGameState(GameState.GameOver);
+        GameOverView.GetInstance().UpdateGui();
     }
     // called when the player decides to quit the game and go to main menu
     public void BackToMainMenu()
@@ -67,26 +76,26 @@ public class GameManager : MonoBehaviour
     }
     void ChangeGameState(GameState newGameState)
     {
-       /* if(newGameState == GameState.Menu)
-        {
-            // load menu screen
-        }else if(newGameState == GameState.Ingame)
-        {
-            // unity will show game
-        }else if(newGameState == GameState.GameOver)
-        {
-            // load game over screen
-        }*/
+       
 
         switch (newGameState)
         {
             case GameState.Menu:
+                mainmenu.enabled = true;
+                gamemenu.enabled = false;
+                gameovermenu.enabled = false;
                 // load menu screen
                 break;
             case GameState.Ingame:
+                mainmenu.enabled = false;
+                gamemenu.enabled = true;
+                gameovermenu.enabled = false;
                 // unity will show game
                 break;
             case GameState.GameOver:
+                mainmenu.enabled = false;
+                gamemenu.enabled = false;
+                gameovermenu.enabled = true;
                 // load game over screen
                 break;
             default:
@@ -95,5 +104,16 @@ public class GameManager : MonoBehaviour
         }
         currentGameState = newGameState;
 
+    }
+
+   public void CollectCoins()
+    {
+        collectedCoins++;
+        ViewInGame.GetInstance().UpdateCoins();
+    }
+
+    public int GetCollectedCoins()
+    {
+        return collectedCoins;
     }
 }
